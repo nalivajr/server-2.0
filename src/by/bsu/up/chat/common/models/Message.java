@@ -1,6 +1,8 @@
-package by.bsu.up.chat.server.models;
+package by.bsu.up.chat.common.models;
 
-public class Message {
+import java.io.Serializable;
+
+public class Message implements Serializable {
 
     private String id;
     private String author;
@@ -37,5 +39,15 @@ public class Message {
 
     public void setText(String text) {
         this.text = text;
+    }
+
+    @Override
+    public String toString() {
+        return "Message{" +
+                "id='" + id + '\'' +
+                ", author='" + author + '\'' +
+                ", timestamp=" + timestamp +
+                ", text='" + text + '\'' +
+                '}';
     }
 }
