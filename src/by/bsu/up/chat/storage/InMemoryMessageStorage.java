@@ -8,7 +8,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class InMemoryMessageStorage implements MessageStorage, Persistable {
+public class InMemoryMessageStorage implements MessageStorage {
 
     private static final String DEFAULT_PERSISTENCE_FILE = "messages.srg";
 
@@ -48,29 +48,5 @@ public class InMemoryMessageStorage implements MessageStorage, Persistable {
     @Override
     public int size() {
         return messages.size();
-    }
-
-    @Override
-    public synchronized boolean persist() {
-        try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(DEFAULT_PERSISTENCE_FILE))){
-            outputStream.writeObject(messages);
-            return true;
-        } catch (IOException e) {
-            logger.error("Error while saving storage", e);
-            return false;
-        }
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public synchronized boolean load() {
-        try (ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(DEFAULT_PERSISTENCE_FILE))){
-            messages = (List<Message>) objectInputStream.readObject();
-            return true;
-        } catch (ClassNotFoundException | IOException e) {
-            logger.error("Error while loading data from storage persistence file", e);
-            logger.info("Resuming with empty storage");
-            return false;
-        }
     }
 }

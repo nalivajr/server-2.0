@@ -1,6 +1,5 @@
 package by.bsu.up.chat;
 
-import by.bsu.up.chat.client.Client;
 import by.bsu.up.chat.logging.impl.Log;
 import by.bsu.up.chat.server.ServerHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -19,10 +18,6 @@ public class Launcher {
     public static final String SHORT_HELP_COMMAND = "-h";
     public static final String SERVER_COMMAND = "--server";
     public static final String SHORT_SERVER_COMMAND = "-s";
-    public static final String CLIENT_COMMAND = "--client";
-    public static final String SHORT_CLIENT_COMMAND = "-c";
-    public static final String PARAM_PORT = "-p";
-    public static final String PARAM_HOST = "-h";
 
     public static final int MAX_PORT_VALUE = 1 << 16 - 1;
 
@@ -36,9 +31,6 @@ public class Launcher {
         if (args[0].equals(SERVER_COMMAND) || args[0].equals(SHORT_SERVER_COMMAND)) {
             launchServer(args);
             return;
-        }
-        if (args[0].equals(CLIENT_COMMAND) || args[0].equals(SHORT_CLIENT_COMMAND)) {
-            launchClient(args);
         }
     }
 
@@ -75,25 +67,6 @@ public class Launcher {
         } catch (IOException e) {
             logger.error("Could not launch server", e);
         }
-    }
-
-    public static void launchClient(String[] args) {
-        String hostPattern = "(http|ftp|https):\\/\\/[\\w\\-_]+(\\.[\\w\\-_]+)+([\\w\\-\\.,@?^=%&amp;:/~\\+#]*[\\w\\-\\@?^=%&amp;/~\\+#])?";
-        String commandRegex = "(-c)|(--client) -l " + hostPattern + "[A-z0-9.] -p [0-9]{1,5}";
-
-        if (String.join(" ", args).matches(commandRegex)) {
-            logger.info("Invalid command. Please see help");
-        }
-        Optional<Integer> optPort = getPortFromArgs(args[4]);
-        if (!optPort.isPresent()) {
-            return;
-        }
-        String host = args[2];
-        int port = optPort.get();
-
-        logger.info(String.format("Connection to server by address %s:%d", host, port));
-        Client client = new Client(host, port);
-        client.connect();
     }
 
     private static Optional<Integer> getPortFromArgs(String portArg) {

@@ -3,12 +3,11 @@ package by.bsu.up.chat.server;
 import by.bsu.up.chat.Constants;
 import by.bsu.up.chat.InvalidTokenException;
 import by.bsu.up.chat.common.models.Message;
-import by.bsu.up.chat.storage.Persistable;
-import by.bsu.up.chat.storage.Portion;
 import by.bsu.up.chat.logging.Logger;
 import by.bsu.up.chat.logging.impl.Log;
 import by.bsu.up.chat.storage.InMemoryMessageStorage;
 import by.bsu.up.chat.storage.MessageStorage;
+import by.bsu.up.chat.storage.Portion;
 import by.bsu.up.chat.utils.MessageHelper;
 import by.bsu.up.chat.utils.StringUtils;
 import com.sun.net.httpserver.Headers;
@@ -21,7 +20,6 @@ import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -29,16 +27,7 @@ public class ServerHandler implements HttpHandler {
 
     private static final Logger logger = Log.create(ServerHandler.class);
 
-//    private List<String> messageStorage = new ArrayList<>();
     private MessageStorage messageStorage = new InMemoryMessageStorage();
-    private AtomicInteger addedMessages = new AtomicInteger();
-
-    public ServerHandler() {
-        // load old messages
-        if (messageStorage instanceof Persistable) {
-            ((Persistable) messageStorage).load();
-        }
-    }
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
@@ -105,18 +94,10 @@ public class ServerHandler implements HttpHandler {
             Message message = MessageHelper.getClientMessage(httpExchange.getRequestBody());
             logger.info(String.format("Received new message from user: %s", message));
             messageStorage.addMessage(message);
-            persistStorage();
             return Response.ok();
         } catch (ParseException e) {
             logger.error("Could not parse message.", e);
             return new Response(Constants.RESPONSE_CODE_BAD_REQUEST, "Incorrect request body");
-        }
-    }
-
-    private void persistStorage() {
-        int added = addedMessages.incrementAndGet();
-        if (messageStorage instanceof Persistable && added % Constants.MESSAGE_FLUSH_TARIGGER == 0) {
-            ((Persistable) messageStorage).persist();
         }
     }
 
