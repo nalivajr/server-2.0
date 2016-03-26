@@ -14,37 +14,45 @@ public class Launcher {
 
     private static final Log logger = Log.create(Launcher.class);
 
+    public static final int DEFAULT_SERVER_PORT = 8080;
+
     public static final String HELP_COMMAND = "--help";
     public static final String SHORT_HELP_COMMAND = "-h";
-    public static final String SERVER_COMMAND = "--server";
-    public static final String SHORT_SERVER_COMMAND = "-s";
+
+    public static final String PARAM_PORT = "--port";
+    public static final String SHORT_PARAM_PORT = "-p";
 
     public static final int MAX_PORT_VALUE = 1 << 16 - 1;
 
     public static void main(String[] args) {
-        if (args == null || args.length == 0 ||
-                args[0].equals(HELP_COMMAND) ||
+        if (args == null || args.length == 0) {
+            logger.info(String.format("Port is not specified. Starting Server on default port %d", DEFAULT_SERVER_PORT));
+            launchServer(new String[] {SHORT_PARAM_PORT, String.valueOf(DEFAULT_SERVER_PORT) });
+            return;
+        }
+
+        if (args[0].equals(HELP_COMMAND) ||
                 args[0].equals(SHORT_HELP_COMMAND)) {
             printHelp();
             return;
         }
-        if (args[0].equals(SERVER_COMMAND) || args[0].equals(SHORT_SERVER_COMMAND)) {
+        if (args[0].equals(PARAM_PORT) || args[0].equals(SHORT_PARAM_PORT)) {
             launchServer(args);
             return;
         }
     }
 
     private static void printHelp() {
-        System.out.println("-s, --server -p port \t\t - start server on port");
-        System.out.println("-c, --client -h host -p port \t\t - start server on port");
+        System.out.println("-p port \t\t - start server on port");
         System.out.println("-h, --help \t\t - print help");
     }
 
     public static void launchServer(String[] args) {
-        if (String.join(" ", args).matches("(-s)|(--server) -p [0-9]{1,5}")) {
+        if (!String.join(" ", args).matches("(-p|--port) [0-9]{1,5}")) {
             logger.info("Invalid command. Please see help");
+            return;
         }
-        Optional<Integer> optPort = getPortFromArgs(args[2]);
+        Optional<Integer> optPort = getPortFromArgs(args[1]);
         if (!optPort.isPresent()) {
             return;
         }
